@@ -4,7 +4,6 @@ header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST, GET, PUT, DELETE");
 header("Access-Control-Allow-Headers: Content-Type");
 
-// CONFIGURAÇÃO DO BANCO (Ajuste se sua senha for diferente)
 $host = "localhost";
 $db_name = "termo_tecnico_db";
 $username = "root";
@@ -21,84 +20,60 @@ try {
 $method = $_SERVER['REQUEST_METHOD'];
 $data = json_decode(file_get_contents("php://input"));
 
-// OPERAÇÃO DE CREATE (POST)
-if ($method == 'POST') {
+switch ($method) {
+case 'POST':
     if (!empty($data->nome) && !empty($data->descricao)) {
         try {
-            // No seu diagrama a tabela é 'termos'
-            $sql = "INSERT INTO termos (nome_termo, descricao_termo, tipo_termo) VALUES (:nome, :desc, :tipo)";
+            // Agora temos 5 colunas e 5 valores correspondentes
+            $sql = "INSERT INTO termos (nome_termo, descricao_termo, tipo_termo, salas_idsalas, usuario_idusuario) 
+                    VALUES (:nome, :desc, :tipo, :sala, :usuario)";
+            
             $stmt = $conn->prepare($sql);
             
-            $stmt->bindParam(':nome', $data->nome);
-            $stmt->bindParam(':desc', $data->descricao);
-            $stmt->bindParam(':tipo', $data->tipo);
+            // Todos os 5 tokens aqui devem existir no SQL acima
+            $stmt->execute([
+                ':nome'    => $data->nome,
+                ':desc'    => $data->descricao,
+                ':tipo'    => $data->tipo,
+                ':sala'    => 2, // Certifique-se que o ID 1 existe na tabela 'salas'
+                ':usuario' => 1  // Certifique-se que o ID 1 existe na tabela 'usuario'
+            ]);
             
-            if ($stmt->execute()) {
-                echo json_encode(["success" => true, "message" => "Termo criado com sucesso!"]);
-            }
+            echo json_encode(["success" => true, "message" => "Termo criado!"]);
         } catch(PDOException $e) {
-            echo json_encode(["success" => false, "message" => "Erro ao inserir: " . $e->getMessage()]);
+            echo json_encode(["success" => false, "message" => "Erro de Banco: " . $e->getMessage()]);
         }
     } else {
-        echo json_encode(["success" => false, "message" => "Dados incompletos."]);
+        echo json_encode(["success" => false, "message" => "Campos obrigatórios vazios."]);
     }
-}
+    break;
 
-// OPERAÇÃO DE LISTAR (GET) - Para o Dashboard
-if ($method == 'GET') {
-    $stmt = $conn->prepare("SELECT idtermos as id_termo_tecnico, nome_termo as nome, descricao_termo, tipo_termo FROM termos");
-    $stmt->execute();
-    $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    echo json_encode(["success" => true, "data" => $result]);
-}
+    case 'GET':
+        $stmt = $conn->prepare("SELECT idtermos as id_termo_tecnico, nome_termo as nome, descricao_termo, tipo_termo FROM termos");
+        $stmt->execute();
+        echo json_encode(["success" => true, "data" => $stmt->fetchAll(PDO::FETCH_ASSOC)]);
+        break;
+
     case 'PUT':
-        $data = json_decode(file_get_contents("php://input"));
-
-        if (!isset($data->id_termo_tecnico) || !isset($data->nome) || !isset($data->descricao)) {
-            echo json_encode(["success" => false, "message" => "Dados incompletos para atualização."]);
-            exit;
-        }
-
-        $id = (int)$data->id_termo_tecnico;
-        $nome = $conn->real_escape_string(trim($data->nome));
-        $descricao = $conn->real_escape_string(trim($data->descricao));
-        $tipo = $conn->real_escape_string($data->tipo);
-        $id_sala = (int)$data->id_sala;
-
-        $sql = "UPDATE termos SET 
-                nome_termo = '$nome', 
-                descricao_termo = '$descricao', 
-                tipo_termo = '$tipo', 
-                salas_idsalas = $id_sala 
-                WHERE idtermos = $id";
-
-        if ($conn->query($sql) === TRUE) {
-            echo json_encode(["success" => true, "message" => "termo_tecnico atualizado com sucesso!"]);
-        } else {
-            echo json_encode(["success" => false, "message" => "Erro ao atualizar termo_tecnico: " . $conn->error]);
+        try {
+            $sql = "UPDATE termos SET nome_termo = :nome, descricao_termo = :desc, tipo_termo = :tipo WHERE idtermos = :id";
+            $stmt = $conn->prepare($sql);
+            $stmt->execute([
+                ':nome' => $data->nome,
+                ':desc' => $data->descricao,
+                ':tipo' => $data->tipo,
+                ':id'   => $data->id_termo_tecnico
+            ]);
+            echo json_encode(["success" => true]);
+        } catch(PDOException $e) {
+            echo json_encode(["success" => false, "message" => $e->getMessage()]);
         }
         break;
 
     case 'DELETE':
-        $data = json_decode(file_get_contents("php://input"));
-        
-        if (!isset($data->id_termo_tecnico)) {
-            echo json_encode(["success" => false, "message" => "ID não fornecido."]);
-            exit;
-        }
-
-        $id = (int)$data->id_termo_tecnico;
-        $sql = "DELETE FROM termos WHERE idtermos = $id";
-        
-        if ($conn->query($sql) === TRUE) {
-            echo json_encode(["success" => true, "message" => "termo_tecnico excluído com sucesso!"]);
-        } else {
-            echo json_encode(["success" => false, "message" => "Erro ao excluir: " . $conn->error]);
-        }
-        break;
-
-    default:
-        echo json_encode(["success" => false, "message" => "Método não suportado."]);
+        $stmt = $conn->prepare("DELETE FROM termos WHERE idtermos = :id");
+        $stmt->execute([':id' => $data->id_termo_tecnico]);
+        echo json_encode(["success" => true]);
         break;
 }
 ?>

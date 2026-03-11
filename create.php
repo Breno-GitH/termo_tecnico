@@ -75,12 +75,11 @@
         btn.innerHTML = "Processando...";
 
         try {
-            // AJUSTADO: O caminho agora é exatamente api/termo_tecnico.php
-            const response = await fetch('api/termo_tecnico.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(dados)
-            });
+const response = await fetch('api/api_termo_tecnico.php', { 
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(dados)
+});
 
             // Verifica se a resposta foi bem sucedida antes de tentar ler o JSON
             if (!response.ok) {

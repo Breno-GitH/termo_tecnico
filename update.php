@@ -175,7 +175,7 @@
                     body: JSON.stringify({ id_termo_tecnico: termoId })
                 });
                 const result = await res.json();
-                if(result.success) window.location.href = 'config_termo_tecnico.php';
+                if(result.success) window.location.href = 'dashboard.php';
             } catch (error) {
                 alert("Erro ao excluir.");
             }
