@@ -1,242 +1,139 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dicionário Técnico - Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-<title>Dicionário Técnico - Dashboard</title>
+    <style>
+        :root {
+            --magenta: #F500C0;
+            --ciano: #4EE5F0;
+            --amarelo: #E5D84E;
+            --cinza: #607575;
+            --roxo: #7B3D6E;
+        }
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+        body { background: #f4f6f7; }
 
-<style>
+        .navbar { background: var(--magenta); }
+        .navbar-brand { color: white; font-weight: bold; }
 
-:root{
---magenta:#F500C0;
---ciano:#4EE5F0;
---amarelo:#E5D84E;
---cinza:#607575;
---roxo:#7B3D6E;
-}
+        .card-dashboard {
+            border: none;
+            border-radius: 12px;
+            color: white;
+            padding: 20px;
+        }
 
-body{
-background:#f4f6f7;
-}
-
-/* NAVBAR */
-
-.navbar{
-background:var(--magenta);
-}
-
-.navbar-brand{
-color:white;
-font-weight:bold;
-}
-
-/* CARDS */
-
-.card-dashboard{
-border:none;
-border-radius:12px;
-color:white;
-padding:10px;
-}
-
-.card-magenta{
-background:var(--magenta);
-}
-
-.card-ciano{
-background:var(--ciano);
-color:black;
-}
-
-.card-amarelo{
-background:var(--amarelo);
-color:black;
-}
-
-/* BOTÃO */
-
-.btn-criar{
-background:var(--magenta);
-color:white;
-border:none;
-}
-
-.btn-criar:hover{
-background:#c4009b;
-}
-
-/* TABELA */
-
-.table thead{
-background:var(--cinza);
-color:white;
-}
-
-</style>
-
+        .card-magenta { background: var(--magenta); }
+        .btn-criar { background: var(--magenta); color: white; border: none; }
+        .btn-criar:hover { background: #c4009b; color: white; }
+        .table thead { background: var(--cinza); color: white; }
+    </style>
 </head>
-
 <body>
 
-<!-- NAVBAR -->
-
-<nav class="navbar navbar-expand-lg">
-<div class="container">
-<a class="navbar-brand">Dicionário Técnico</a>
-</div>
+<nav class="navbar navbar-expand-lg mb-4">
+    <div class="container">
+        <a class="navbar-brand" href="#">Dicionário Técnico</a>
+    </div>
 </nav>
 
-<div class="container mt-4">
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card-dashboard card-magenta text-center shadow-sm">
+                <h5>Total de Termos</h5>
+                <h2 id="totalTermos">0</h2> 
+            </div>
+        </div>
+    </div>
 
-<!-- CARDS -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4>Lista de Termos Técnicos</h4>
+        <a href="create.php" class="btn btn-criar">
+            <i class="bi bi-plus-circle me-1"></i> Criar Termo Técnico
+        </a>
+    </div>
 
-<div class="row g-3 mb-4">
-
-<div class="col-md-4">
-<div class="card-dashboard card-magenta text-center">
-<h5>Total de Termos</h5>
-<h2>120</h2>
-</div>
-</div>
-
-</div>
-
-<!-- BOTÃO -->
-
-<div class="d-flex justify-content-between mb-3">
-
-<h4>Lista de Termos</h4>
-
-<a href="create.php"><button class="btn btn-criar">Criar Termo Técnico</button>
-</a>
-</div>
-
-<!-- TABELA -->
-
-<div class="card shadow-sm">
-
-<div class="card-body">
-
-<table class="table table-hover">
-
-<thead>
-<tr>
-<th>ID</th>
-<th>Nome do Termo</th>
-<th>Descrição</th>
-<th>Ações</th>
-</tr>
-</thead>
-
-<tbody id="tabelaTermo">
-</tbody>
-
-</table>
-
-</div>
-
-</div>
-
-</div>
-
-
-<!-- MODAL CRIAR TERMO -->
-
-<div class="modal fade" id="modalTermo">
-
-<div class="modal-dialog">
-
-<div class="modal-content">
-
-<div class="modal-header">
-
-<h5 class="modal-title">Novo Termo Técnico</h5>
-
-<button class="btn-close" data-bs-dismiss="modal"></button>
-
-</div>
-
-<div class="modal-body">
-
-<form>
-
-<div class="mb-3">
-<label class="form-label">Termo</label>
-<input type="text" class="form-control">
-</div>
-
-<div class="mb-3">
-<label class="form-label">Categoria</label>
-<input type="text" class="form-control">
-</div>
-
-<div class="mb-3">
-<label class="form-label">Descrição</label>
-<textarea class="form-control"></textarea>
-</div>
-
-</form>
-
-</div>
-
-<div class="modal-footer">
-
-<button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-
-<button class="btn btn-criar">Salvar</button>
-
-</div>
-
-</div>
-
-</div>
-
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th class="ps-3">ID</th>
+                        <th>Nome do Termo</th>
+                        <th>Descrição</th>
+                        <th class="text-center">Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="tabelaTermo">
+                    </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
 <script>
-
 async function carregarTermos() {
-
     try {
-
+        // Busca os dados da API
         const response = await fetch("http://localhost/2025/termo_tecnico/api/api_termo_tecnico.php");
         const resultado = await response.json();
 
-        if(resultado.success){
-
+        if (resultado.success) {
             const tabela = document.getElementById("tabelaTermo");
+            const contador = document.getElementById("totalTermos");
+            
+            // Limpa a tabela
             tabela.innerHTML = "";
+            
+            // 1. ATUALIZA O CONTADOR DINAMICAMENTE
+            contador.innerText = resultado.data.length;
 
+            // 2. PREENCHE A TABELA
             resultado.data.forEach(termo => {
-
                 tabela.innerHTML += `
                 <tr>
-                    <td>${termo.id_termo_tecnico}</td>
-                    <td>${termo.nome}</td>
+                    <td class="ps-3">#${termo.id_termo_tecnico}</td>
+                    <td><strong>${termo.nome}</strong></td>
                     <td>${termo.descricao_termo}</td>
-                    <td>
-                        <button class="btn btn-sm btn-warning">Editar</button>
-                        <button class="btn btn-sm btn-danger">Excluir</button>
+                    <td class="text-center">
+                        <div class="btn-group">
+                            <a href="update.php?id=${termo.id_termo_tecnico}" class="btn btn-sm btn-warning">
+                                <i class="bi bi-pencil"></i> Editar
+                            </a>
+                            <button class="btn btn-sm btn-danger" onclick="excluirTermo(${termo.id_termo_tecnico})">
+                                <i class="bi bi-trash"></i> Excluir
+                            </button>
+                        </div>
                     </td>
                 </tr>
                 `;
-
             });
-
         }
-
     } catch (erro) {
         console.error("Erro ao carregar termos:", erro);
     }
-
 }
 
-carregarTermos();
+// Função para excluir (Exemplo básico)
+async function excluirTermo(id) {
+    if (confirm("Deseja realmente excluir este termo?")) {
+        // Aqui você chamaria sua API com o método DELETE
+        console.log("Excluindo o ID:", id);
+        alert("Função de exclusão acionada para o ID " + id);
+    }
+}
 
+// Inicia a carga de dados ao abrir a página
+carregarTermos();
 </script>
+
 </body>
 </html>
