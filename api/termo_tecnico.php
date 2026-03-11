@@ -1,67 +1,56 @@
 <?php
-session_start();
-require_once '../config/database.php';
-header('Content-Type: application/json');
+header("Content-Type: application/json");
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: POST, GET, PUT, DELETE");
+header("Access-Control-Allow-Headers: Content-Type");
 
-if (!isset($_SESSION['user_id'])) {
-    echo json_encode(["success" => false, "message" => "Acesso negado."]);
+// CONFIGURAÇÃO DO BANCO (Ajuste se sua senha for diferente)
+$host = "localhost";
+$db_name = "termo_tecnico_db";
+$username = "root";
+$password = ""; 
+
+try {
+    $conn = new PDO("mysql:host=$host;dbname=$db_name;charset=utf8", $username, $password);
+    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch(PDOException $e) {
+    echo json_encode(["success" => false, "message" => "Erro de conexão: " . $e->getMessage()]);
     exit;
 }
 
 $method = $_SERVER['REQUEST_METHOD'];
-$user_id_logado = $_SESSION['user_id'];
+$data = json_decode(file_get_contents("php://input"));
 
-switch ($method) {
-    case 'POST':
-        $data = json_decode(file_get_contents("php://input"));
-        
-        if (!isset($data->nome) || !isset($data->descricao) || !isset($data->tipo)) {
-            echo json_encode(["success" => false, "message" => "Dados incompletos."]);
-            exit;
-        }
-
-        $nome = $conn->real_escape_string($data->nome);
-        $desc = $conn->real_escape_string($data->descricao);
-        $tipo = $conn->real_escape_string($data->tipo);
-
-        // 1. Buscar todas as salas existentes
-        $resultSalas = $conn->query("SELECT idsalas FROM salas");
-        
-        if ($resultSalas->num_rows === 0) {
-            echo json_encode(["success" => false, "message" => "Nenhuma sala cadastrada. Crie uma sala primeiro."]);
-            exit;
-        }
-
-        // 2. Iniciar transação para garantir que ou grava em todas ou em nenhuma
-        $conn->begin_transaction();
-
+// OPERAÇÃO DE CREATE (POST)
+if ($method == 'POST') {
+    if (!empty($data->nome) && !empty($data->descricao)) {
         try {
-            while ($sala = $resultSalas->fetch_assoc()) {
-                $id_sala = $sala['idsalas'];
-                $sql = "INSERT INTO termos (nome_termo, descricao_termo, tipo_termo, salas_idsalas, usuario_idusuario) 
-                        VALUES ('$nome', '$desc', '$tipo', $id_sala, $user_id_logado)";
-                $conn->query($sql);
+            // No seu diagrama a tabela é 'termos'
+            $sql = "INSERT INTO termos (nome_termo, descricao_termo, tipo_termo) VALUES (:nome, :desc, :tipo)";
+            $stmt = $conn->prepare($sql);
+            
+            $stmt->bindParam(':nome', $data->nome);
+            $stmt->bindParam(':desc', $data->descricao);
+            $stmt->bindParam(':tipo', $data->tipo);
+            
+            if ($stmt->execute()) {
+                echo json_encode(["success" => true, "message" => "Termo criado com sucesso!"]);
             }
-            $conn->commit();
-            echo json_encode(["success" => true, "message" => "Termo adicionado em todas as salas com sucesso!"]);
-        } catch (Exception $e) {
-            $conn->rollback();
-            echo json_encode(["success" => false, "message" => "Erro ao replicar termo: " . $conn->error]);
+        } catch(PDOException $e) {
+            echo json_encode(["success" => false, "message" => "Erro ao inserir: " . $e->getMessage()]);
         }
-        break;
-
-    case 'GET':
-        // No GET, usamos DISTINCT para não mostrar o mesmo termo repetido várias vezes no dashboard
-        $sql = "SELECT DISTINCT nome_termo AS nome, descricao_termo, tipo_termo 
-                FROM termos ORDER BY nome_termo ASC";
-        $result = $conn->query($sql);
-        $termos = [];
-        while ($row = $result->fetch_assoc()) { $termos[] = $row; }
-        echo json_encode(["success" => true, "data" => $termos]);
-        break;
-        
+    } else {
+        echo json_encode(["success" => false, "message" => "Dados incompletos."]);
+    }
 }
 
+// OPERAÇÃO DE LISTAR (GET) - Para o Dashboard
+if ($method == 'GET') {
+    $stmt = $conn->prepare("SELECT idtermos as id_termo_tecnico, nome_termo as nome, descricao_termo, tipo_termo FROM termos");
+    $stmt->execute();
+    $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    echo json_encode(["success" => true, "data" => $result]);
+}
     case 'PUT':
         $data = json_decode(file_get_contents("php://input"));
 
