@@ -38,15 +38,18 @@
     </div>
 </nav>
 
-<div class="container">
-    <div class="row mb-4">
-        <div class="col-md-4">
-            <div class="card-dashboard card-magenta text-center shadow-sm">
-                <h5>Total de Termos</h5>
-                <h2 id="totalTermos">0</h2> 
-            </div>
-        </div>
-    </div>
+<div class="container mt-4">
+
+<!-- CARDS -->
+
+<div class="row g-3 mb-4">
+
+<div class="col-md-4">
+<div class="card-dashboard card-magenta text-center">
+<h5>Total de Termos</h5>
+<h2 id="totalTermos">0</h2>
+</div>
+</div>
 
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h4>Lista de Termos Técnicos</h4>
@@ -74,6 +77,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
 
 <script>
 async function carregarTermos() {
