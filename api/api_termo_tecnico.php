@@ -3,11 +3,6 @@ session_start();
 require_once '../config/database.php';
 header('Content-Type: application/json');
 
-if (!isset($_SESSION['user_id'])) {
-    echo json_encode(["success" => false, "message" => "Acesso negado."]);
-    exit;
-}
-
 $method = $_SERVER['REQUEST_METHOD'];
 $user_id_logado = $_SESSION['user_id'];
 
@@ -60,7 +55,6 @@ switch ($method) {
         echo json_encode(["success" => true, "data" => $termos]);
         break;
         
-}
 
     case 'PUT':
         $data = json_decode(file_get_contents("php://input"));
