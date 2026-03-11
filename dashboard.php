@@ -110,10 +110,8 @@ color:white;
 
 <h4>Lista de Termos</h4>
 
-<button class="btn btn-criar" data-bs-toggle="modal" data-bs-target="#modalTermo">
-Criar Termo Técnico
-</button>
-
+<a href="create.php"><button class="btn btn-criar">Criar Termo Técnico</button>
+</a>
 </div>
 
 <!-- TABELA -->
