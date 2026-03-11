@@ -131,12 +131,7 @@ color:white;
 </tr>
 </thead>
 
-<tbody>
-
-<tr id="tabelaTermo">
-</tr>
-
-
+<tbody id="tabelaTermo">
 </tbody>
 
 </table>
@@ -203,6 +198,44 @@ color:white;
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+
+async function carregarTermos() {
+
+    try {
+
+        const response = await fetch("http://localhost/2025/termo_tecnico/api/api_termo_tecnico.php");
+        const resultado = await response.json();
+
+        if(resultado.success){
+
+            const tabela = document.getElementById("tabelaTermo");
+            tabela.innerHTML = "";
+
+            resultado.data.forEach(termo => {
+
+                tabela.innerHTML += `
+                <tr>
+                    <td>${termo.id_termo_tecnico}</td>
+                    <td>${termo.nome}</td>
+                    <td>${termo.descricao_termo}</td>
+                    <td>
+                        <button class="btn btn-sm btn-warning">Editar</button>
+                        <button class="btn btn-sm btn-danger">Excluir</button>
+                    </td>
+                </tr>
+                `;
+
+            });
+
+        }
+
+    } catch (erro) {
+        console.error("Erro ao carregar termos:", erro);
+    }
+
+}
+
+carregarTermos();
 
 </script>
 </body>
