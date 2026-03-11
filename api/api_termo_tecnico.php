@@ -51,7 +51,7 @@ if ($method == 'GET') {
     $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
     echo json_encode(["success" => true, "data" => $result]);
 }
-    case 'PUT':
+     case 'PUT':
         $data = json_decode(file_get_contents("php://input"));
 
         if (!isset($data->id_termo_tecnico) || !isset($data->nome) || !isset($data->descricao)) {
