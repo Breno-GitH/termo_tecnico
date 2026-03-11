@@ -75,13 +75,12 @@
         btn.innerHTML = "Processando...";
 
         try {
-const response = await fetch('api/api_termo_tecnico.php', { 
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(dados)
-});
+            const response = await fetch('api/api_termo_tecnico.php', { 
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(dados)
+            });
 
-            // Verifica se a resposta foi bem sucedida antes de tentar ler o JSON
             if (!response.ok) {
                 throw new Error('Erro na rede: ' + response.status);
             }
@@ -90,14 +89,14 @@ const response = await fetch('api/api_termo_tecnico.php', {
             
             if (result.success) {
                 alert("Sucesso! Termo criado.");
-                window.location.href = 'config_termo_tecnico.php';
+                // ALTERADO: Agora redireciona para o dashboard.php
+                window.location.href = 'dashboard.php';
             } else {
                 alert("Erro: " + result.message);
                 btn.disabled = false;
                 btn.innerHTML = "Registrar termo_tecnico";
             }
         } catch (error) {
-            // Este erro aparece se o arquivo api/termo_tecnico.php não for encontrado ou tiver erro interno
             alert("Erro na comunicação com o servidor. Verifique o Console (F12).");
             console.error("Detalhes do erro:", error);
             btn.disabled = false;
