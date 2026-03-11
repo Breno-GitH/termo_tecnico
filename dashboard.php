@@ -51,7 +51,7 @@
 <div class="col-md-4">
 <div class="card-dashboard card-magenta text-center">
 <h5>Total de Termos</h5>
-<h2>120</h2>
+<h2 id="totalTermos">0</h2>
 </div>
 </div>
 
@@ -70,7 +70,7 @@
                         <th class="ps-3">ID</th>
                         <th>Nome do Termo</th>
                         <th>Descrição</th>
-                        <th class="text-center">Açõess</th>
+                        <th class="text-center">Ações</th>
                     </tr>
                 </thead>
                 <tbody id="tabelaTermo">
