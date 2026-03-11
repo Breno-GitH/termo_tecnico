@@ -98,7 +98,7 @@ color:white;
 <div class="col-md-4">
 <div class="card-dashboard card-magenta text-center">
 <h5>Total de Termos</h5>
-<h2>120</h2>
+<h2></h2>
 </div>
 </div>
 
