@@ -17,21 +17,17 @@
         }
 
         body { background: #f4f6f7; }
-
         .navbar { background: var(--magenta); }
         .navbar-brand { color: white; font-weight: bold; }
-
-        .card-dashboard {
-            border: none;
-            border-radius: 12px;
-            color: white;
-            padding: 20px;
-        }
-
+        .card-dashboard { border: none; border-radius: 12px; color: white; padding: 20px; }
         .card-magenta { background: var(--magenta); }
         .btn-criar { background: var(--magenta); color: white; border: none; }
         .btn-criar:hover { background: #c4009b; color: white; }
         .table thead { background: var(--cinza); color: white; }
+        
+        /* Ajuste para o botão de editar ocupar bem o espaço */
+        .btn-editar { background-color: var(--amarelo); color: black; border: none; }
+        .btn-editar:hover { background-color: #d4c73d; color: black; }
     </style>
 </head>
 <body>
@@ -82,7 +78,6 @@
 <script>
 async function carregarTermos() {
     try {
-        // Busca os dados da API
         const response = await fetch("http://localhost/2025/termo_tecnico/api/api_termo_tecnico.php");
         const resultado = await response.json();
 
@@ -90,13 +85,9 @@ async function carregarTermos() {
             const tabela = document.getElementById("tabelaTermo");
             const contador = document.getElementById("totalTermos");
             
-            // Limpa a tabela
             tabela.innerHTML = "";
-            
-            // 1. ATUALIZA O CONTADOR DINAMICAMENTE
             contador.innerText = resultado.data.length;
 
-            // 2. PREENCHE A TABELA
             resultado.data.forEach(termo => {
                 tabela.innerHTML += `
                 <tr>
@@ -104,14 +95,9 @@ async function carregarTermos() {
                     <td><strong>${termo.nome}</strong></td>
                     <td>${termo.descricao_termo}</td>
                     <td class="text-center">
-                        <div class="btn-group">
-                            <a href="update.php?id=${termo.id_termo_tecnico}" class="btn btn-sm btn-warning">
-                                <i class="bi bi-pencil"></i> Editar
-                            </a>
-                            <button class="btn btn-sm btn-danger" onclick="excluirTermo(${termo.id_termo_tecnico})">
-                                <i class="bi bi-trash"></i> Excluir
-                            </button>
-                        </div>
+                        <a href="update.php?id=${termo.id_termo_tecnico}" class="btn btn-sm btn-editar shadow-sm">
+                            <i class="bi bi-pencil-square"></i> Editar
+                        </a>
                     </td>
                 </tr>
                 `;
@@ -122,16 +108,6 @@ async function carregarTermos() {
     }
 }
 
-// Função para excluir (Exemplo básico)
-async function excluirTermo(id) {
-    if (confirm("Deseja realmente excluir este termo?")) {
-        // Aqui você chamaria sua API com o método DELETE
-        console.log("Excluindo o ID:", id);
-        alert("Função de exclusão acionada para o ID " + id);
-    }
-}
-
-// Inicia a carga de dados ao abrir a página
 carregarTermos();
 </script>
 

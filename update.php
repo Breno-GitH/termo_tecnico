@@ -34,7 +34,7 @@
 
 <main class="container py-5">
     <div class="mb-4 d-flex justify-content-between align-items-center">
-        <a href="config_termo_tecnico.php" class="btn btn-outline-secondary shadow-sm">
+        <a href="dashboard.php" class="btn btn-outline-secondary shadow-sm">
             <i class="bi bi-arrow-left"></i> Voltar ao Dashboard
         </a>
         <button class="btn btn-danger shadow-sm" onclick="deletarTermo()">
@@ -92,27 +92,24 @@
 </main>
 
 <script>
-    // Pega o ID da URL (?id=X)
     const urlParams = new URLSearchParams(window.location.search);
     const termoId = urlParams.get('id');
 
     document.addEventListener('DOMContentLoaded', () => {
         if (!termoId) {
             alert("Erro: ID do termo não foi enviado.");
-            window.location.href = 'config_termo_tecnico.php';
+            window.location.href = 'dashboard.php';
             return;
         }
         carregarDadosParaUpdate();
     });
 
-    // Busca os dados atuais do banco termo_tecnico_db
     async function carregarDadosParaUpdate() {
         try {
             const res = await fetch(`api/api_termo_tecnico.php`);
             const result = await res.json();
             
             if (result.success) {
-                // Filtra o termo específico pelo ID
                 const termo = result.data.find(t => t.id_termo_tecnico == termoId);
                 
                 if (termo) {
@@ -128,7 +125,6 @@
         }
     }
 
-    // Função que envia o PUT (Update) para a API
     async function executarUpdate() {
         const btn = document.querySelector('.btn-update');
         const dados = {
@@ -152,7 +148,8 @@
             
             if(result.success) {
                 alert("Update realizado com sucesso!");
-                window.location.href = 'config_termo_tecnico.php';
+                // CORRIGIDO: Redireciona para o dashboard
+                window.location.href = 'dashboard.php';
             } else {
                 alert("Erro no Update: " + result.message);
                 btn.disabled = false;
@@ -165,7 +162,6 @@
         }
     }
 
-    // Função de Exclusão
     async function deletarTermo() {
         if (confirm("Deseja realmente excluir este registro?")) {
             try {
@@ -175,7 +171,11 @@
                     body: JSON.stringify({ id_termo_tecnico: termoId })
                 });
                 const result = await res.json();
-                if(result.success) window.location.href = 'dashboard.php';
+                // CORRIGIDO: Redireciona para o dashboard após excluir
+                if(result.success) {
+                    alert("Registro excluído!");
+                    window.location.href = 'dashboard.php';
+                }
             } catch (error) {
                 alert("Erro ao excluir.");
             }
