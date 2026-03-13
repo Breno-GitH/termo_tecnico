@@ -36,9 +36,16 @@
 </head>
 <body>
 
-    <nav class="navbar navbar-expand-lg mb-4">
+    <nav class="navbar navbar-expand-lg mb-4 shadow-sm">
         <div class="container">
-            <a class="navbar-brand" href="#">Dicionário Técnico - Professor</a>
+            <a class="navbar-brand" href="#">
+                <i class="bi bi-book me-2"></i>Dicionário Técnico - Usuário
+            </a>
+            <div class="d-flex align-items-center">
+                <a href="api/logout.php" class="btn btn-outline-light btn-sm">
+                    <i class="bi bi-box-arrow-right me-1"></i> Sair
+                </a>
+            </div>
         </div>
     </nav>
 
