@@ -89,7 +89,6 @@
             
             if (result.success) {
                 alert("Sucesso! Termo criado.");
-                // ALTERADO: Agora redireciona para o dashboard.php
                 window.location.href = 'dashboard.php';
             } else {
                 alert("Erro: " + result.message);
