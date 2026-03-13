@@ -24,19 +24,19 @@ switch ($method) {
 case 'POST':
     if (!empty($data->nome) && !empty($data->descricao)) {
         try {
-            // Agora temos 5 colunas e 5 valores correspondentes
+            
             $sql = "INSERT INTO termos (nome_termo, descricao_termo, tipo_termo, salas_idsalas, usuario_idusuario) 
                     VALUES (:nome, :desc, :tipo, :sala, :usuario)";
             
             $stmt = $conn->prepare($sql);
             
-            // Todos os 5 tokens aqui devem existir no SQL acima
+           
             $stmt->execute([
                 ':nome'    => $data->nome,
                 ':desc'    => $data->descricao,
                 ':tipo'    => $data->tipo,
-                ':sala'    => 2, // Certifique-se que o ID 1 existe na tabela 'salas'
-                ':usuario' => 1  // Certifique-se que o ID 1 existe na tabela 'usuario'
+                ':sala'    => 2,
+                ':usuario' => 1  
             ]);
             
             echo json_encode(["success" => true, "message" => "Termo criado!"]);
