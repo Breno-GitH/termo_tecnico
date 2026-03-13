@@ -90,12 +90,9 @@
                 const response = await fetch("api/api_termo_tecnico.php");
                 const resultado = await response.json();
 
-                if (resultado.success) {
-                    const tabela = document.getElementById("tabelaTermo");
-                    const contador = document.getElementById("totalTermos");
-                    
-                    tabela.innerHTML = "";
-                    contador.innerText = resultado.data.length;
+        try {
+            const response = await fetch("http://localhost/2025/termo_tecnico/api/api_termo_tecnico.php");
+            const resultado = await response.json();
 
                     if(resultado.data.length === 0) {
                         tabela.innerHTML = `<tr><td colspan="4" class="text-center p-4 text-muted">Nenhuma sugestão enviada ainda.</td></tr>`;
@@ -106,8 +103,12 @@
                         let badgeClass = "badge-espera";
                         let statusTexto = termo.status || "Em Espera";
 
-                        if(statusTexto === "Aprovado") badgeClass = "badge-aprovado";
-                        if(statusTexto === "Reprovado") badgeClass = "badge-reprovado";
+                resultado.data.forEach(termo => {
+                    // Sincronizando com os nomes das colunas do seu Banco de Dados
+                    const id = termo.idtermos; 
+                    const nome = termo.nome_termo;
+                    const desc = termo.descricao_termo;
+                    const statusTexto = termo.status || "Em espera";
 
                         tabela.innerHTML += `
                         <tr>
@@ -130,7 +131,11 @@
                 console.error("Erro ao carregar termos:", erro);
                 document.getElementById("tabelaTermo").innerHTML = `<tr><td colspan="4" class="text-center text-danger p-3">Erro ao carregar dados do servidor.</td></tr>`;
             }
+        } catch (erro) {
+            console.error("Erro ao carregar termos:", erro);
+            tabela.innerHTML = "<tr><td colspan='4' class='text-center text-danger'>Erro ao conectar com a API.</td></tr>";
         }
+    }
 
         // Inicia a carga de dados
         carregarTermos();

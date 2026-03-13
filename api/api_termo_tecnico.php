@@ -21,58 +21,64 @@ $method = $_SERVER['REQUEST_METHOD'];
 $data = json_decode(file_get_contents("php://input"));
 
 switch ($method) {
-case 'POST':
-    if (!empty($data->nome) && !empty($data->descricao)) {
-        try {
-            
-            $sql = "INSERT INTO termos (nome_termo, descricao_termo, tipo_termo, salas_idsalas, usuario_idusuario) 
-                    VALUES (:nome, :desc, :tipo, :sala, :usuario)";
-            
-            $stmt = $conn->prepare($sql);
-            
-           
-            $stmt->execute([
-                ':nome'    => $data->nome,
-                ':desc'    => $data->descricao,
-                ':tipo'    => $data->tipo,
-                ':sala'    => 2,
-                ':usuario' => 1  
-            ]);
-            
-            echo json_encode(["success" => true, "message" => "Termo criado!"]);
-        } catch(PDOException $e) {
-            echo json_encode(["success" => false, "message" => "Erro de Banco: " . $e->getMessage()]);
+    case 'POST':
+        if (!empty($data->nome) && !empty($data->descricao)) {
+            try {
+                $sql = "INSERT INTO termos (nome_termo, descricao_termo, tipo_termo, status, salas_idsalas, usuario_idusuario) 
+                        VALUES (:nome, :desc, :tipo, :status, :sala, :usuario)";
+                
+                $stmt = $conn->prepare($sql);
+                $stmt->execute([
+                    ':nome'    => $data->nome,
+                    ':desc'    => $data->descricao,
+                    ':tipo'    => $data->tipo,
+                    ':status'  => 'Em espera',
+                    ':sala'    => 2,
+                    ':usuario' => 1  
+                ]);
+                echo json_encode(["success" => true, "message" => "Termo criado!"]);
+            } catch(PDOException $e) {
+                echo json_encode(["success" => false, "message" => "Erro de Banco: " . $e->getMessage()]);
+            }
+        } else {
+            echo json_encode(["success" => false, "message" => "Campos obrigatórios vazios."]);
         }
-    } else {
-        echo json_encode(["success" => false, "message" => "Campos obrigatórios vazios."]);
-    }
-    break;
+        break;
 
     case 'GET':
-        $stmt = $conn->prepare("SELECT idtermos as id_termo_tecnico, nome_termo as nome, descricao_termo, tipo_termo FROM termos");
+        // Buscando todos os campos necessários, incluindo o status
+        $sql = "SELECT idtermos, nome_termo, descricao_termo, tipo_termo, status, salas_idsalas, usuario_idusuario FROM termos";
+        $stmt = $conn->prepare($sql);
         $stmt->execute();
         echo json_encode(["success" => true, "data" => $stmt->fetchAll(PDO::FETCH_ASSOC)]);
         break;
 
     case 'PUT':
         try {
-            $sql = "UPDATE termos SET nome_termo = :nome, descricao_termo = :desc, tipo_termo = :tipo WHERE idtermos = :id";
+            // O UPDATE agora aceita o campo status enviado pelo professor
+            $sql = "UPDATE termos SET 
+                    nome_termo = :nome, 
+                    descricao_termo = :desc, 
+                    tipo_termo = :tipo, 
+                    status = :status 
+                    WHERE idtermos = :id";
             $stmt = $conn->prepare($sql);
             $stmt->execute([
-                ':nome' => $data->nome,
-                ':desc' => $data->descricao,
-                ':tipo' => $data->tipo,
-                ':id'   => $data->id_termo_tecnico
+                ':nome'   => $data->nome_termo,
+                ':desc'   => $data->descricao_termo,
+                ':tipo'   => $data->tipo_termo,
+                ':status' => $data->status,
+                ':id'     => $data->idtermos
             ]);
             echo json_encode(["success" => true]);
         } catch(PDOException $e) {
-            echo json_encode(["success" => false, "message" => $e->getMessage()]);
+            echo json_encode(["success" => false, "message" => "Erro ao atualizar: " . $e->getMessage()]);
         }
         break;
 
     case 'DELETE':
         $stmt = $conn->prepare("DELETE FROM termos WHERE idtermos = :id");
-        $stmt->execute([':id' => $data->id_termo_tecnico]);
+        $stmt->execute([':id' => $data->idtermos]);
         echo json_encode(["success" => true]);
         break;
 }
