@@ -75,6 +75,7 @@
         btn.innerHTML = "Processando...";
 
         try {
+
             const response = await fetch('api/api_termo_tecnico.php', { 
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -88,7 +89,10 @@
             const result = await response.json();
             
             if (result.success) {
+
                 alert("Sucesso! Termo criado.");
+                // ALTERADO: Agora redireciona para o dashboard.php
+               if($_SESSION) 
                 window.location.href = 'dashboard.php';
             } else {
                 alert("Erro: " + result.message);
