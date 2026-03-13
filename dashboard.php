@@ -32,88 +32,80 @@
 </head>
 <body>
 
-<nav class="navbar navbar-expand-lg mb-4">
-    <div class="container">
-        <a class="navbar-brand" href="#">Dicionário Técnico</a>
-    </div>
-</nav>
+    <nav class="navbar navbar-expand-lg mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="#">Dicionário Técnico</a>
+        </div>
+    </nav>
 
-<div class="container mt-4">
+    <div class="container mt-4">
+    <div class="row g-3 mb-4">
 
-<!-- CARDS -->
-
-<div class="row g-3 mb-4">
-
-<div class="col-md-4">
-<div class="card-dashboard card-magenta text-center">
-<h5>Total de Termos</h5>
-<h2 id="totalTermos">0</h2>
-</div>
-</div>
-
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4>Lista de Termos Técnicos</h4>
-        <a href="create.php" class="btn btn-criar">
-            <i class="bi bi-plus-circle me-1"></i> Criar Termo Técnico
-        </a>
-    </div>
-
-    <div class="card shadow-sm">
-        <div class="card-body p-0">
-            <table class="table table-hover mb-0">
-                <thead>
-                    <tr>
-                        <th class="ps-3">ID</th>
-                        <th>Nome do Termo</th>
-                        <th>Descrição</th>
-                        <th class="text-center">Ações</th>
-                    </tr>
-                </thead>
-                <tbody id="tabelaTermo">
-                    </tbody>
-            </table>
+        <div class="col-md-4">
+            <div class="card-dashboard card-magenta text-center">
+                <h5>Total de Termos</h5>
+                <h2 id="totalTermos">0</h2>
+            </div>
+        </div>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4>Lista de Termos Técnicos</h4>
+            <a href="create.php" class="btn btn-criar">
+                <i class="bi bi-plus-circle me-1"></i> Criar Termo Técnico
+            </a>
+        </div>
+        <div class="card shadow-sm">
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th class="ps-3">ID</th>
+                            <th>Nome do Termo</th>
+                            <th>Descrição</th>
+                            <th class="text-center">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelaTermo">
+                        </tbody>
+                </table>
+            </div>
         </div>
     </div>
-</div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        async function carregarTermos() {
+            try {
+                const response = await fetch("http://localhost/2025/termo_tecnico/api/api_termo_tecnico.php");
+                const resultado = await response.json();
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+                if (resultado.success) {
+                    const tabela = document.getElementById("tabelaTermo");
+                    const contador = document.getElementById("totalTermos");
+                    
+                    tabela.innerHTML = "";
+                    contador.innerText = resultado.data.length;
 
-
-<script>
-async function carregarTermos() {
-    try {
-        const response = await fetch("http://localhost/2025/termo_tecnico/api/api_termo_tecnico.php");
-        const resultado = await response.json();
-
-        if (resultado.success) {
-            const tabela = document.getElementById("tabelaTermo");
-            const contador = document.getElementById("totalTermos");
-            
-            tabela.innerHTML = "";
-            contador.innerText = resultado.data.length;
-
-            resultado.data.forEach(termo => {
-                tabela.innerHTML += `
-                <tr>
-                    <td class="ps-3">#${termo.id_termo_tecnico}</td>
-                    <td><strong>${termo.nome}</strong></td>
-                    <td>${termo.descricao_termo}</td>
-                    <td class="text-center">
-                        <a href="update.php?id=${termo.id_termo_tecnico}" class="btn btn-sm btn-editar shadow-sm">
-                            <i class="bi bi-pencil-square"></i> Editar
-                        </a>
-                    </td>
-                </tr>
-                `;
-            });
+                    resultado.data.forEach(termo => {
+                        tabela.innerHTML += `
+                        <tr>
+                            <td class="ps-3">#${termo.id_termo_tecnico}</td>
+                            <td><strong>${termo.nome}</strong></td>
+                            <td>${termo.descricao_termo}</td>
+                            <td class="text-center">
+                                <a href="update.php?id=${termo.id_termo_tecnico}" class="btn btn-sm btn-editar shadow-sm">
+                                    <i class="bi bi-pencil-square"></i> Editar
+                                </a>
+                            </td>
+                        </tr>
+                        `;
+                    });
+                }
+            } catch (erro) {
+                console.error("Erro ao carregar termos:", erro);
+            }
         }
-    } catch (erro) {
-        console.error("Erro ao carregar termos:", erro);
-    }
-}
 
-carregarTermos();
-</script>
+        carregarTermos();
+    </script>
 
 </body>
 </html>
