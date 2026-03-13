@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -30,16 +31,24 @@
 </head>
 <body>
 
-    <nav class="navbar navbar-expand-lg mb-4">
+    <nav class="navbar navbar-expand-lg mb-4 shadow-sm">
         <div class="container">
-            <a class="navbar-brand" href="#">Dicionário Técnico - Usuário</a>
+            <a class="navbar-brand" href="#">
+                <i class="bi bi-book me-2"></i>Dicionário Técnico - Usuário
+            </a>
+            
+            <div class="d-flex align-items-center">
+                <a href="api/logout.php" class="btn btn-outline-light btn-sm">
+                    <i class="bi bi-box-arrow-right me-1"></i> Sair
+                </a>
+            </div>
         </div>
     </nav>
 
     <div class="container mt-4">
         <div class="row g-3 mb-4">
             <div class="col-md-4">
-                <div class="card-dashboard card-magenta text-center">
+                <div class="card-dashboard card-magenta text-center shadow-sm">
                     <h5>Meus Termos Enviados</h5>
                     <h2 id="totalTermos">0</h2>
                 </div>
@@ -48,25 +57,27 @@
 
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h4>Acompanhamento de Sugestões</h4>
-            <a href="create.php" class="btn btn-criar">
+            <a href="create.php" class="btn btn-criar shadow-sm">
                 <i class="bi bi-plus-circle me-1"></i> Sugerir Novo Termo
             </a>
         </div>
 
-        <div class="card shadow-sm">
+        <div class="card shadow-sm border-0">
             <div class="card-body p-0">
-                <table class="table table-hover mb-0 align-middle">
-                    <thead>
-                        <tr>
-                            <th class="ps-3">ID</th>
-                            <th>Nome do Termo</th>
-                            <th>Descrição</th>
-                            <th class="text-center">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabelaTermo">
-                        </tbody>
-                </table>
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0 align-middle">
+                        <thead>
+                            <tr>
+                                <th class="ps-3">ID</th>
+                                <th>Nome do Termo</th>
+                                <th>Descrição</th>
+                                <th class="text-center">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaTermo">
+                            </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
@@ -75,7 +86,8 @@
     <script>
         async function carregarTermos() {
             try {
-                const response = await fetch("http://localhost/2025/termo_tecnico/api/api_termo_tecnico.php");
+                // Ajuste a URL se necessário (removendo o localhost fixo ajuda na portabilidade)
+                const response = await fetch("api/api_termo_tecnico.php");
                 const resultado = await response.json();
 
                 if (resultado.success) {
@@ -85,8 +97,12 @@
                     tabela.innerHTML = "";
                     contador.innerText = resultado.data.length;
 
+                    if(resultado.data.length === 0) {
+                        tabela.innerHTML = `<tr><td colspan="4" class="text-center p-4 text-muted">Nenhuma sugestão enviada ainda.</td></tr>`;
+                        return;
+                    }
+
                     resultado.data.forEach(termo => {
-                        // Define a cor e o texto do status
                         let badgeClass = "badge-espera";
                         let statusTexto = termo.status || "Em Espera";
 
@@ -95,11 +111,11 @@
 
                         tabela.innerHTML += `
                         <tr>
-                            <td class="ps-3">#${termo.id_termo_tecnico}</td>
+                            <td class="ps-3 text-muted">#${termo.id_termo_tecnico}</td>
                             <td><strong>${termo.nome}</strong></td>
                             <td>${termo.descricao_termo}</td>
                             <td class="text-center">
-                                <span class="badge ${badgeClass} p-2 shadow-sm">
+                                <span class="badge ${badgeClass} p-2 shadow-sm" style="min-width: 110px;">
                                     ${statusTexto === "Reprovado" ? '<i class="bi bi-x-circle me-1"></i>' : ''}
                                     ${statusTexto === "Aprovado" ? '<i class="bi bi-check-circle me-1"></i>' : ''}
                                     ${statusTexto === "Em Espera" ? '<i class="bi bi-clock me-1"></i>' : ''}
@@ -112,9 +128,11 @@
                 }
             } catch (erro) {
                 console.error("Erro ao carregar termos:", erro);
+                document.getElementById("tabelaTermo").innerHTML = `<tr><td colspan="4" class="text-center text-danger p-3">Erro ao carregar dados do servidor.</td></tr>`;
             }
         }
 
+        // Inicia a carga de dados
         carregarTermos();
     </script>
 </body>
