@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -23,10 +22,7 @@
         .btn-criar:hover { background: #c4009b; color: white; }
         .table thead { background: var(--cinza); color: white; }
 
-        /* Cores dos Badges de Status */
-        .badge-espera { background-color: #ffc107; color: #000; }   /* Amarelo */
-        .badge-aprovado { background-color: #198754; color: #fff; } /* Verde */
-        .badge-reprovado { background-color: #dc3545; color: #fff; } /* Vermelho */
+        .badge-aprovado { background-color: #198754; color: #fff; }
     </style>
 </head>
 <body>
@@ -36,7 +32,6 @@
             <a class="navbar-brand" href="#">
                 <i class="bi bi-book me-2"></i>Dicionário Técnico - Usuário
             </a>
-            
             <div class="d-flex align-items-center">
                 <a href="api/logout.php" class="btn btn-outline-light btn-sm">
                     <i class="bi bi-box-arrow-right me-1"></i> Sair
@@ -49,14 +44,14 @@
         <div class="row g-3 mb-4">
             <div class="col-md-4">
                 <div class="card-dashboard card-magenta text-center shadow-sm">
-                    <h5>Meus Termos Enviados</h5>
+                    <h5>Termos Disponíveis</h5>
                     <h2 id="totalTermos">0</h2>
                 </div>
             </div>
         </div>
 
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h4>Acompanhamento de Sugestões</h4>
+            <h4>Dicionário de Termos Técnicos</h4>
             <a href="create.php" class="btn btn-criar shadow-sm">
                 <i class="bi bi-plus-circle me-1"></i> Sugerir Novo Termo
             </a>
@@ -85,57 +80,52 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         async function carregarTermos() {
+            const tabela = document.getElementById("tabelaTermo");
+            const contador = document.getElementById("totalTermos");
+
             try {
-                // Ajuste a URL se necessário (removendo o localhost fixo ajuda na portabilidade)
+                // Buscamos todos os termos da API
                 const response = await fetch("api/api_termo_tecnico.php");
                 const resultado = await response.json();
 
-        try {
-            const response = await fetch("http://localhost/2025/termo_tecnico/api/api_termo_tecnico.php");
-            const resultado = await response.json();
+                if (resultado.success) {
+                    tabela.innerHTML = "";
+                    
+                    // FILTRO: Filtramos apenas os termos que tem o status "Aprovado"
+                    const termosAprovados = resultado.data.filter(termo => termo.status === "Aprovado");
+                    
+                    // Atualiza o contador com a quantidade de aprovados
+                    contador.innerText = termosAprovados.length;
 
-                    if(resultado.data.length === 0) {
-                        tabela.innerHTML = `<tr><td colspan="4" class="text-center p-4 text-muted">Nenhuma sugestão enviada ainda.</td></tr>`;
+                    if(termosAprovados.length === 0) {
+                        tabela.innerHTML = `<tr><td colspan="4" class="text-center p-4 text-muted">Nenhum termo técnico aprovado no momento.</td></tr>`;
                         return;
                     }
 
-                    resultado.data.forEach(termo => {
-                        let badgeClass = "badge-espera";
-                        let statusTexto = termo.status || "Em Espera";
-
-                resultado.data.forEach(termo => {
-                    // Sincronizando com os nomes das colunas do seu Banco de Dados
-                    const id = termo.idtermos; 
-                    const nome = termo.nome_termo;
-                    const desc = termo.descricao_termo;
-                    const statusTexto = termo.status || "Em espera";
+                    termosAprovados.forEach(termo => {
+                        // Sincronizando com as colunas do seu banco
+                        const id = termo.idtermos; 
+                        const nome = termo.nome_termo;
+                        const desc = termo.descricao_termo;
 
                         tabela.innerHTML += `
                         <tr>
-                            <td class="ps-3 text-muted">#${termo.id_termo_tecnico}</td>
-                            <td><strong>${termo.nome}</strong></td>
-                            <td>${termo.descricao_termo}</td>
+                            <td class="ps-3 text-muted">#${id}</td>
+                            <td><strong>${nome}</strong></td>
+                            <td>${desc}</td>
                             <td class="text-center">
-                                <span class="badge ${badgeClass} p-2 shadow-sm" style="min-width: 110px;">
-                                    ${statusTexto === "Reprovado" ? '<i class="bi bi-x-circle me-1"></i>' : ''}
-                                    ${statusTexto === "Aprovado" ? '<i class="bi bi-check-circle me-1"></i>' : ''}
-                                    ${statusTexto === "Em Espera" ? '<i class="bi bi-clock me-1"></i>' : ''}
-                                    ${statusTexto}
+                                <span class="badge badge-aprovado p-2 shadow-sm" style="min-width: 110px;">
+                                    <i class="bi bi-check-circle me-1"></i> Aprovado
                                 </span>
                             </td>
-                        </tr>
-                        `;
+                        </tr>`;
                     });
                 }
             } catch (erro) {
                 console.error("Erro ao carregar termos:", erro);
-                document.getElementById("tabelaTermo").innerHTML = `<tr><td colspan="4" class="text-center text-danger p-3">Erro ao carregar dados do servidor.</td></tr>`;
+                tabela.innerHTML = `<tr><td colspan="4" class="text-center text-danger p-3">Erro ao conectar com o servidor.</td></tr>`;
             }
-        } catch (erro) {
-            console.error("Erro ao carregar termos:", erro);
-            tabela.innerHTML = "<tr><td colspan='4' class='text-center text-danger'>Erro ao conectar com a API.</td></tr>";
         }
-    }
 
         // Inicia a carga de dados
         carregarTermos();
