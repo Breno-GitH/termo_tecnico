@@ -73,10 +73,6 @@
                                     <option value="Matemática">Matemática</option>
                                 </select>
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">ID da Sala</label>
-                                <input type="text" id="id_sala_display" class="form-control bg-light" readonly disabled>
-                            </div>
                         </div>
 
                         <hr class="my-4">
