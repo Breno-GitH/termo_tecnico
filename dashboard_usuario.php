@@ -34,7 +34,7 @@
 
     <nav class="navbar navbar-expand-lg mb-4">
         <div class="container">
-            <a class="navbar-brand" href="#">Dicionário Técnico - Professor</a>
+            <a class="navbar-brand" href="#">Dicionário Técnico - Usuário</a>
         </div>
     </nav>
 
@@ -61,7 +61,6 @@
                             <th class="ps-3">ID</th>
                             <th>Nome do Termo</th>
                             <th>Descrição</th>
-                            <th class="text-center">Ações</th>
                         </tr>
                     </thead>
                     <tbody id="tabelaTermo">
@@ -90,11 +89,7 @@
                             <td class="ps-3">#${termo.id_termo_tecnico}</td>
                             <td><strong>${termo.nome}</strong></td>
                             <td>${termo.descricao_termo}</td>
-                            <td class="text-center">
-                                <a href="update.php?id=${termo.id_termo_tecnico}" class="btn btn-sm btn-editar shadow-sm">
-                                    <i class="bi bi-pencil-square"></i> Editar
-                                </a>
-                            </td>
+                            
                         </tr>
                         `;
                     });
