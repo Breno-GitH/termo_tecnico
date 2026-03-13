@@ -50,7 +50,11 @@ if (!isset($_SESSION['id'])) {
                             <label class="form-label fw-bold">Descrição Técnica</label>
                             <textarea id="descricao_termo" class="form-control" rows="6" placeholder="Definição do termo..." required></textarea>
                         </div>
-
+                    <div class="mb-3">
+    <label class="form-label fw-bold">Imagem Ilustrativa</label>
+    <input type="file" id="imagem_termo" class="form-control" accept="image/*">
+    <small class="text-muted">Formatos aceitos: JPG, PNG ou GIF.</small>
+</div>
                         <div class="d-grid gap-2">
                             <button type="button" class="btn btn-criar btn-lg py-3" onclick="executarCreate()">
                                 Registrar Termo Técnico
@@ -64,17 +68,24 @@ if (!isset($_SESSION['id'])) {
     </div>
 </div>
 
+
+
 <script>
     async function executarCreate() {
         const btn = document.querySelector('.btn-criar');
+        const imagemInput = document.getElementById('imagem_termo');
         
-        const dados = {
-            nome: document.getElementById('nome_termo').value,
-            tipo: document.getElementById('tipo_termo').value,
-            descricao: document.getElementById('descricao_termo').value
-        };
+        // Usamos FormData para enviar arquivos
+        const formData = new FormData();
+        formData.append('nome', document.getElementById('nome_termo').value);
+        formData.append('tipo', document.getElementById('tipo_termo').value);
+        formData.append('descricao', document.getElementById('descricao_termo').value);
+        
+        if (imagemInput.files[0]) {
+            formData.append('imagem', imagemInput.files[0]);
+        }
 
-        if(!dados.nome || !dados.descricao) {
+        if(!document.getElementById('nome_termo').value || !document.getElementById('descricao_termo').value) {
             alert("Preencha todos os campos!");
             return;
         }
@@ -85,20 +96,14 @@ if (!isset($_SESSION['id'])) {
         try {
             const response = await fetch('api/api_termo_tecnico.php', { 
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(dados)
+                // Removido o Content-Type: application/json, o navegador define automaticamente para FormData
+                body: formData 
             });
-
-            // Verifica se a resposta do servidor é válida
-            if (!response.ok) {
-                throw new Error('Erro na rede: ' + response.status);
-            }
 
             const result = await response.json();
             
             if (result.success) {
                 alert("Sucesso! Termo criado.");
-                // Redirecionamento simples via JS
                 window.location.href = 'dashboard.php';
             } else {
                 alert("Erro: " + result.message);
@@ -106,10 +111,9 @@ if (!isset($_SESSION['id'])) {
                 btn.innerHTML = "Registrar Termo Técnico";
             }
         } catch (error) {
-            alert("Erro na comunicação com o servidor. Verifique o Console (F12).");
-            console.error("Detalhes do erro:", error);
+            alert("Erro na comunicação com o servidor.");
+            console.error(error);
             btn.disabled = false;
-            btn.innerHTML = "Registrar Termo Técnico";
         }
     }
 </script>

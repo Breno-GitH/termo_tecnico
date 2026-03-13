@@ -8,11 +8,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
     <style>
-        :root {
-            --magenta: #F500C0;
-            --cinza: #607575;
-        }
-
+        :root { --magenta: #F500C0; --cinza: #607575; }
         body { background: #f4f6f7; }
         .navbar { background: var(--magenta); }
         .navbar-brand { color: white; font-weight: bold; }
@@ -21,21 +17,17 @@
         .btn-criar { background: var(--magenta); color: white; border: none; }
         .btn-criar:hover { background: #c4009b; color: white; }
         .table thead { background: var(--cinza); color: white; }
-
         .badge-aprovado { background-color: #198754; color: #fff; }
+        .img-termo { width: 50px; height: 50px; object-fit: cover; border-radius: 8px; }
     </style>
 </head>
 <body>
 
     <nav class="navbar navbar-expand-lg mb-4 shadow-sm">
         <div class="container">
-            <a class="navbar-brand" href="#">
-                <i class="bi bi-book me-2"></i>Dicionário Técnico - Usuário
-            </a>
+            <a class="navbar-brand" href="#"><i class="bi bi-book me-2"></i>Dicionário Técnico - Usuário</a>
             <div class="d-flex align-items-center">
-                <a href="api/logout.php" class="btn btn-outline-light btn-sm">
-                    <i class="bi bi-box-arrow-right me-1"></i> Sair
-                </a>
+                <a href="api/logout.php" class="btn btn-outline-light btn-sm"><i class="bi bi-box-arrow-right me-1"></i> Sair</a>
             </div>
         </div>
     </nav>
@@ -52,9 +44,7 @@
 
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h4>Dicionário de Termos Técnicos</h4>
-            <a href="create.php" class="btn btn-criar shadow-sm">
-                <i class="bi bi-plus-circle me-1"></i> Sugerir Novo Termo
-            </a>
+            <a href="create.php" class="btn btn-criar shadow-sm"><i class="bi bi-plus-circle me-1"></i> Sugerir Novo Termo</a>
         </div>
 
         <div class="card shadow-sm border-0">
@@ -64,13 +54,13 @@
                         <thead>
                             <tr>
                                 <th class="ps-3">ID</th>
+                                <th>Imagem</th>
                                 <th>Nome do Termo</th>
                                 <th>Descrição</th>
                                 <th class="text-center">Status</th>
                             </tr>
                         </thead>
-                        <tbody id="tabelaTermo">
-                            </tbody>
+                        <tbody id="tabelaTermo"></tbody>
                     </table>
                 </div>
             </div>
@@ -84,50 +74,38 @@
             const contador = document.getElementById("totalTermos");
 
             try {
-                // Buscamos todos os termos da API
                 const response = await fetch("api/api_termo_tecnico.php");
                 const resultado = await response.json();
 
                 if (resultado.success) {
                     tabela.innerHTML = "";
-                    
-                    // FILTRO: Filtramos apenas os termos que tem o status "Aprovado"
                     const termosAprovados = resultado.data.filter(termo => termo.status === "Aprovado");
-                    
-                    // Atualiza o contador com a quantidade de aprovados
                     contador.innerText = termosAprovados.length;
 
                     if(termosAprovados.length === 0) {
-                        tabela.innerHTML = `<tr><td colspan="4" class="text-center p-4 text-muted">Nenhum termo técnico aprovado no momento.</td></tr>`;
+                        tabela.innerHTML = `<tr><td colspan="5" class="text-center p-4 text-muted">Nenhum termo técnico aprovado no momento.</td></tr>`;
                         return;
                     }
 
                     termosAprovados.forEach(termo => {
-                        // Sincronizando com as colunas do seu banco
-                        const id = termo.idtermos; 
-                        const nome = termo.nome_termo;
-                        const desc = termo.descricao_termo;
-
+                        const imgPath = termo.imagem_termo ? `api/uploads/${termo.imagem_termo}` : 'https://via.placeholder.com/50';
+                        
                         tabela.innerHTML += `
                         <tr>
-                            <td class="ps-3 text-muted">#${id}</td>
-                            <td><strong>${nome}</strong></td>
-                            <td>${desc}</td>
+                            <td class="ps-3 text-muted">#${termo.idtermos}</td>
+                            <td><img src="${imgPath}" class="img-termo shadow-sm"></td>
+                            <td><strong>${termo.nome_termo}</strong></td>
+                            <td>${termo.descricao_termo}</td>
                             <td class="text-center">
-                                <span class="badge badge-aprovado p-2 shadow-sm" style="min-width: 110px;">
-                                    <i class="bi bi-check-circle me-1"></i> Aprovado
-                                </span>
+                                <span class="badge badge-aprovado p-2 shadow-sm"><i class="bi bi-check-circle me-1"></i> Aprovado</span>
                             </td>
                         </tr>`;
                     });
                 }
             } catch (erro) {
-                console.error("Erro ao carregar termos:", erro);
-                tabela.innerHTML = `<tr><td colspan="4" class="text-center text-danger p-3">Erro ao conectar com o servidor.</td></tr>`;
+                tabela.innerHTML = `<tr><td colspan="5" class="text-center text-danger p-3">Erro ao carregar dados.</td></tr>`;
             }
         }
-
-        // Inicia a carga de dados
         carregarTermos();
     </script>
 </body>
