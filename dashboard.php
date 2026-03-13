@@ -28,10 +28,10 @@
         .btn-editar { background-color: var(--amarelo); color: black; border: none; }
         .btn-editar:hover { background-color: #d4c73d; color: black; }
 
-        /* Estilização dos Badges de Status */
-        .badge-espera { background-color: #ffc107; color: #000; } /* Amarelo */
-        .badge-aprovado { background-color: #198754; color: #fff; } /* Verde */
-        .badge-reprovado { background-color: #dc3545; color: #fff; } /* Vermelho */
+        /* Badges de Status */
+        .badge-espera { background-color: #ffc107; color: #000; }
+        .badge-aprovado { background-color: #198754; color: #fff; }
+        .badge-reprovado { background-color: #dc3545; color: #fff; }
     </style>
 </head>
 <body>
@@ -53,7 +53,7 @@
         </div>
 
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h4>Gestão de Termos (Avaliação do Professor)</h4>
+            <h4>Gestão de Termos (Avaliação)</h4>
             <a href="create.php" class="btn btn-criar">
                 <i class="bi bi-plus-circle me-1"></i> Criar Termo Técnico
             </a>
@@ -68,7 +68,7 @@
                             <th>Nome do Termo</th>
                             <th>Descrição</th>
                             <th class="text-center">Status Atual</th>
-                            <th class="text-center">Ações de Avaliação</th>
+                            <th class="text-center">Ações</th>
                         </tr>
                     </thead>
                     <tbody id="tabelaTermo">
@@ -79,83 +79,89 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        async function carregarTermos() {
-            try {
-                const response = await fetch("http://localhost/2025/termo_tecnico/api/api_termo_tecnico.php");
-                const resultado = await response.json();
+   <script>
+    const API_URL = "http://localhost/2025/termo_tecnico/api/api_termo_tecnico.php";
 
-                if (resultado.success) {
-                    const tabela = document.getElementById("tabelaTermo");
-                    const contador = document.getElementById("totalTermos");
+    async function carregarTermos() {
+        const tabela = document.getElementById("tabelaTermo");
+        try {
+            const response = await fetch(API_URL);
+            const resultado = await response.json();
+
+            if (resultado.success) {
+                tabela.innerHTML = "";
+                document.getElementById("totalTermos").innerText = resultado.data.length;
+
+                resultado.data.forEach(termo => {
+                    // NOMES EXATOS DO SEU BANCO DE DADOS (Captura 090553)
+                    const id = termo.idtermos; 
+                    const nome = termo.nome_termo;
+                    const desc = termo.descricao_termo;
+                    const statusAtual = termo.status || "Em espera";
                     
-                    tabela.innerHTML = "";
-                    contador.innerText = resultado.data.length;
+                    let badgeClass = "badge-espera";
+                    if(statusAtual === "Aprovado") badgeClass = "badge-aprovado";
+                    if(statusAtual === "Reprovado") badgeClass = "badge-reprovado";
 
-                    resultado.data.forEach(termo => {
-                        // Lógica para definir a cor do badge baseado no status vindo do banco
-                        let badgeClass = "badge-espera";
-                        let statusTexto = termo.status || "Em Espera";
-
-                        if(statusTexto === "Aprovado") badgeClass = "badge-aprovado";
-                        if(statusTexto === "Reprovado") badgeClass = "badge-reprovado";
-
-                        tabela.innerHTML += `
-                        <tr>
-                            <td class="ps-3">#${termo.id_termo_tecnico}</td>
-                            <td><strong>${termo.nome}</strong></td>
-                            <td>${termo.descricao_termo}</td>
-                            <td class="text-center">
-                                <span class="badge ${badgeClass}">${statusTexto}</span>
-                            </td>
-                            <td class="text-center">
-                                <div class="btn-group shadow-sm">
-                                    <button onclick="alterarStatus(${termo.id_termo_tecnico}, 'Aprovado')" class="btn btn-sm btn-success" title="Aprovar">
-                                        <i class="bi bi-check-lg"></i>
-                                    </button>
-                                    <button onclick="alterarStatus(${termo.id_termo_tecnico}, 'Reprovado')" class="btn btn-sm btn-danger" title="Reprovar">
-                                        <i class="bi bi-x-lg"></i>
-                                    </button>
-                                    <a href="update.php?id=${termo.id_termo_tecnico}" class="btn btn-sm btn-editar" title="Editar">
-                                        <i class="bi bi-pencil-square"></i>
-                                    </a>
-                                </div>
-                            </td>
-                        </tr>
-                        `;
-                    });
-                }
-            } catch (erro) {
-                console.error("Erro ao carregar termos:", erro);
+                    tabela.innerHTML += `
+                    <tr>
+                        <td class="ps-3">#${id}</td>
+                        <td><strong>${nome}</strong></td>
+                        <td>${desc}</td>
+                        <td class="text-center"><span class="badge ${badgeClass}">${statusAtual}</span></td>
+                        <td class="text-center">
+                            <div class="btn-group shadow-sm">
+                                <button onclick="alterarStatus(${id}, 'Aprovado')" class="btn btn-sm btn-success"><i class="bi bi-check-lg"></i></button>
+                                <button onclick="alterarStatus(${id}, 'Reprovado')" class="btn btn-sm btn-danger"><i class="bi bi-x-lg"></i></button>
+                                <a href="update.php?id=${id}" class="btn btn-sm btn-editar"><i class="bi bi-pencil-square"></i></a>
+                            </div>
+                        </td>
+                    </tr>`;
+                });
             }
+        } catch (erro) {
+            console.error("Erro ao carregar:", erro);
+            tabela.innerHTML = "<tr><td colspan='5' class='text-center text-danger'>Erro ao ler dados da API. Verifique o Console (F12).</td></tr>";
         }
+    }
 
-        // Função para o professor decidir o status
-        async function alterarStatus(id, novoStatus) {
-            if(confirm(`Deseja alterar o status para ${novoStatus}?`)) {
-                try {
-                    // Aqui você deve ajustar para o endpoint correto da sua API que trata o status
-                    const response = await fetch("http://localhost/2025/termo_tecnico/api/api_termo_tecnico.php", {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            id_termo_tecnico: id,
-                            status: novoStatus
-                        })
-                    });
-                    
-                    const res = await response.json();
-                    if(res.success) {
-                        alert("Status atualizado!");
-                        carregarTermos(); // Recarrega a lista
-                    }
-                } catch (error) {
-                    console.error("Erro ao atualizar status:", error);
-                }
-            }
+  async function alterarStatus(id, novoStatus) {
+    try {
+        // 1. Busca a lista atual para pegar os dados do termo
+        const responseBusca = await fetch(API_URL);
+        const res = await responseBusca.json();
+        const termo = res.data.find(t => t.idtermos == id);
+
+        if (!termo) return;
+
+        // 2. Monta o objeto com os nomes de colunas que o PHP/Banco esperam
+        const dadosUpdate = {
+            idtermos: id,
+            nome_termo: termo.nome_termo,
+            descricao_termo: termo.descricao_termo,
+            tipo_termo: termo.tipo_termo,
+            status: novoStatus // O novo status (Aprovado ou Reprovado)
+        };
+
+        const response = await fetch(API_URL, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(dadosUpdate)
+        });
+
+        const final = await response.json();
+        if (final.success) {
+            alert("Status alterado para: " + novoStatus);
+            carregarTermos(); // Recarrega a tabela
+        } else {
+            alert("Erro ao salvar: " + final.message);
         }
+    } catch (error) {
+        console.error("Erro na conexão:", error);
+    }
+}
 
-        carregarTermos();
-    </script>
+    carregarTermos();
+</script>
 </body>
 </html>
