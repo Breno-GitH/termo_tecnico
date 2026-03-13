@@ -1,3 +1,11 @@
+<?php
+// Proteção de Sessão: Se não estiver logado, volta para o login
+session_start();
+if (!isset($_SESSION['id'])) {
+    header('Location: login.php');
+    exit;
+}
+?>
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -21,7 +29,7 @@
         <div class="col-md-7 col-lg-6">
             <div class="card shadow-lg border-0" style="border-radius: 15px;">
                 <div class="card-header p-4 text-center">
-                    <h4 class="mb-0"><i class="bi bi-plus-circle me-2"></i> Criar termo_tecnico</h4>
+                    <h4 class="mb-0"><i class="bi bi-plus-circle me-2"></i> Criar Termo Técnico</h4>
                 </div>
                 <div class="card-body p-4 bg-white" style="border-radius: 0 0 15px 15px;">
                     <form id="formCriarTermo">
@@ -45,7 +53,7 @@
 
                         <div class="d-grid gap-2">
                             <button type="button" class="btn btn-criar btn-lg py-3" onclick="executarCreate()">
-                                Registrar termo_tecnico
+                                Registrar Termo Técnico
                             </button>
                             <a href="dashboard.php" class="btn btn-outline-secondary">Voltar</a>
                         </div>
@@ -75,13 +83,13 @@
         btn.innerHTML = "Processando...";
 
         try {
-
             const response = await fetch('api/api_termo_tecnico.php', { 
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(dados)
             });
 
+            // Verifica se a resposta do servidor é válida
             if (!response.ok) {
                 throw new Error('Erro na rede: ' + response.status);
             }
@@ -89,21 +97,19 @@
             const result = await response.json();
             
             if (result.success) {
-
                 alert("Sucesso! Termo criado.");
-                // ALTERADO: Agora redireciona para o dashboard.php
-               if($_SESSION) 
+                // Redirecionamento simples via JS
                 window.location.href = 'dashboard.php';
             } else {
                 alert("Erro: " + result.message);
                 btn.disabled = false;
-                btn.innerHTML = "Registrar termo_tecnico";
+                btn.innerHTML = "Registrar Termo Técnico";
             }
         } catch (error) {
             alert("Erro na comunicação com o servidor. Verifique o Console (F12).");
             console.error("Detalhes do erro:", error);
             btn.disabled = false;
-            btn.innerHTML = "Registrar termo_tecnico";
+            btn.innerHTML = "Registrar Termo Técnico";
         }
     }
 </script>
