@@ -1,9 +1,20 @@
+<?php
+// Proteção de Sessão e captura do perfil
+session_start();
+if (!isset($_SESSION['id'])) {
+    header('Location: login.php');
+    exit;
+}
+
+// Pegamos o perfil para usar no título e no filtro do JS
+$perfil_sessao = $_SESSION['perfil'] ?? 'aluno';
+?>
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dicionário Técnico - Professor</title>
+    <title>Dicionário Técnico - <?php echo ucfirst($perfil_sessao); ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
@@ -28,8 +39,9 @@
 
     <nav class="navbar navbar-expand-lg mb-4 shadow-sm">
         <div class="container">
-            <a class="navbar-brand" href="#"><i class="bi bi-book me-2"></i>Dicionário Técnico - Professor</a>
+            <a class="navbar-brand" href="#"><i class="bi bi-book me-2"></i>Dicionário Técnico - <?php echo ucfirst($perfil_sessao); ?></a>
             <div class="d-flex align-items-center">
+                <span class="text-white me-3">Olá, Prof. de <?php echo ucfirst($perfil_sessao); ?></span>
                 <a href="api/logout.php" class="btn btn-outline-light btn-sm"><i class="bi bi-box-arrow-right me-1"></i> Sair</a>
             </div>
         </div>
@@ -39,14 +51,14 @@
         <div class="row g-3 mb-4">
             <div class="col-md-4">
                 <div class="card-dashboard card-magenta text-center">
-                    <h5>Total de Termos</h5>
+                    <h5>Total de Termos (<?php echo ucfirst($perfil_sessao); ?>)</h5>
                     <h2 id="totalTermos">0</h2>
                 </div>
             </div>
         </div>
 
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h4>Gestão de Termos (Avaliação)</h4>
+            <h4>Gestão de Termos</h4>
             <a href="create.php" class="btn btn-criar"><i class="bi bi-plus-circle me-1"></i> Criar Termo Técnico</a>
         </div>
 
@@ -72,6 +84,9 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         const API_URL = "api/api_termo_tecnico.php";
+        
+        // Capturamos o perfil da sessão PHP para filtrar no JavaScript
+        const PERFIL_PROFESSOR = "<?php echo $perfil_sessao; ?>".toLowerCase();
 
         async function carregarTermos() {
             const tabela = document.getElementById("tabelaTermo");
@@ -81,9 +96,15 @@
 
                 if (resultado.success) {
                     tabela.innerHTML = "";
-                    document.getElementById("totalTermos").innerText = resultado.data.length;
+                    
+                    // FILTRAGEM: Apenas termos onde o tipo_termo corresponde ao perfil do professor
+                    const termosFiltrados = resultado.data.filter(termo => 
+                        termo.tipo_termo.toLowerCase() === PERFIL_PROFESSOR
+                    );
 
-                    resultado.data.forEach(termo => {
+                    document.getElementById("totalTermos").innerText = termosFiltrados.length;
+
+                    termosFiltrados.forEach(termo => {
                         const imgPath = termo.imagem_termo ? `api/uploads/${termo.imagem_termo}` : 'https://via.placeholder.com/40';
                         let badgeClass = "badge-espera";
                         if(termo.status === "Aprovado") badgeClass = "badge-aprovado";
@@ -98,13 +119,17 @@
                             <td class="text-center"><span class="badge ${badgeClass}">${termo.status || "Em espera"}</span></td>
                             <td class="text-center">
                                 <div class="btn-group shadow-sm">
-                                    <button onclick="alterarStatus(${termo.idtermos}, 'Aprovado')" class="btn btn-sm btn-success"><i class="bi bi-check-lg"></i></button>
-                                    <button onclick="alterarStatus(${termo.idtermos}, 'Reprovado')" class="btn btn-sm btn-danger"><i class="bi bi-x-lg"></i></button>
-                                    <a href="update.php?id=${termo.idtermos}" class="btn btn-sm btn-editar"><i class="bi bi-pencil-square"></i></a>
+                                    <button onclick="alterarStatus(${termo.idtermos}, 'Aprovado')" class="btn btn-sm btn-success" title="Aprovar"><i class="bi bi-check-lg"></i></button>
+                                    <button onclick="alterarStatus(${termo.idtermos}, 'Reprovado')" class="btn btn-sm btn-danger" title="Reprovar"><i class="bi bi-x-lg"></i></button>
+                                    <a href="update.php?id=${termo.idtermos}" class="btn btn-sm btn-editar" title="Editar"><i class="bi bi-pencil-square"></i></a>
                                 </div>
                             </td>
                         </tr>`;
                     });
+
+                    if (termosFiltrados.length === 0) {
+                        tabela.innerHTML = "<tr><td colspan='6' class='text-center p-4'>Nenhum termo técnico cadastrado para sua área.</td></tr>";
+                    }
                 }
             } catch (erro) {
                 console.error(erro);
@@ -124,7 +149,6 @@
                 });
 
                 if ((await response.json()).success) {
-                    alert("Status atualizado!");
                     carregarTermos();
                 }
             } catch (error) { console.error(error); }
