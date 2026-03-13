@@ -93,7 +93,7 @@
 
     document.addEventListener('DOMContentLoaded', () => {
         if (!termoId) {
-            alert("Erro: ID do termo não foi enviado.");
+            alert("Erro: ID do termo não encontrado.");
             window.location.href = 'dashboard.php';
             return;
         }
@@ -106,56 +106,42 @@
             const result = await res.json();
             
             if (result.success) {
-                const termo = result.data.find(t => t.id_termo_tecnico == termoId);
+                // Sincronizado com idtermos do banco
+                const termo = result.data.find(t => t.idtermos == termoId);
                 
                 if (termo) {
-                    document.getElementById('id_termo_tecnico').value = termo.id_termo_tecnico;
-                    document.getElementById('nome').value = termo.nome;
+                    document.getElementById('id_termo_tecnico').value = termo.idtermos;
+                    document.getElementById('nome').value = termo.nome_termo;
                     document.getElementById('descricao').value = termo.descricao_termo;
                     document.getElementById('tipo').value = termo.tipo_termo;
-                    document.getElementById('id_sala_display').value = termo.salas_idsalas;
                 }
             }
-        } catch (error) {
-            console.error("Erro ao carregar dados:", error);
-        }
+        } catch (error) { console.error("Erro:", error); }
     }
 
     async function executarUpdate() {
         const btn = document.querySelector('.btn-update');
         const dados = {
-            id_termo_tecnico: document.getElementById('id_termo_tecnico').value,
-            nome: document.getElementById('nome').value,
-            descricao: document.getElementById('descricao').value,
-            tipo: document.getElementById('tipo').value
+            idtermos: document.getElementById('id_termo_tecnico').value,
+            nome_termo: document.getElementById('nome').value,
+            descricao_termo: document.getElementById('descricao').value,
+            tipo_termo: document.getElementById('tipo').value,
+            status: 'Em espera' // Volta para análise após editar
         };
 
         btn.disabled = true;
-        btn.innerHTML = "<span class='spinner-border spinner-border-sm'></span> Processando Update...";
-
         try {
             const res = await fetch('api/api_termo_tecnico.php', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(dados)
             });
-            
             const result = await res.json();
-            
             if(result.success) {
-                alert("Update realizado com sucesso!");
-                // CORRIGIDO: Redireciona para o dashboard
+                alert("Atualizado com sucesso!");
                 window.location.href = 'dashboard.php';
-            } else {
-                alert("Erro no Update: " + result.message);
-                btn.disabled = false;
-                btn.innerHTML = "<i class='bi bi-save2 me-2'></i> Salvar Alterações (Update)";
             }
-        } catch (error) {
-            alert("Erro na comunicação com o servidor.");
-            btn.disabled = false;
-            btn.innerHTML = "<i class='bi bi-save2 me-2'></i> Salvar Alterações (Update)";
-        }
+        } catch (error) { alert("Erro ao atualizar"); btn.disabled = false; }
     }
 
     async function deletarTermo() {
@@ -164,17 +150,16 @@
                 const res = await fetch('api/api_termo_tecnico.php', {
                     method: 'DELETE',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id_termo_tecnico: termoId })
+                    body: JSON.stringify({ idtermos: termoId }) // Enviando idtermos
                 });
                 const result = await res.json();
-                // CORRIGIDO: Redireciona para o dashboard após excluir
                 if(result.success) {
                     alert("Registro excluído!");
                     window.location.href = 'dashboard.php';
+                } else {
+                    alert("Erro: " + result.message);
                 }
-            } catch (error) {
-                alert("Erro ao excluir.");
-            }
+            } catch (error) { alert("Erro na comunicação."); }
         }
     }
 </script>
