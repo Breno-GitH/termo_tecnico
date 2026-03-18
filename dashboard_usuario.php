@@ -10,7 +10,10 @@
 
 <style>
 
-:root { --magenta: #F500C0; --cinza: #607575; }
+:root { 
+--magenta: #F500C0; 
+--cinza: #607575; 
+}
 
 body { background: #f4f6f7; }
 
@@ -18,47 +21,73 @@ body { background: #f4f6f7; }
 
 .navbar-brand { color: white; font-weight: bold; }
 
-.card-dashboard {
-border: none;
-border-radius: 12px;
-color: white;
-padding: 20px;
+.card-dashboard{
+border:none;
+border-radius:12px;
+color:white;
+padding:20px;
 }
 
-.card-magenta { background: var(--magenta); }
+.card-magenta{ background:var(--magenta); }
 
-.btn-criar {
-background: var(--magenta);
-color: white;
-border: none;
+.btn-criar{
+background:var(--magenta);
+color:white;
+border:none;
 }
 
-.btn-criar:hover {
-background: #c4009b;
-color: white;
+.btn-criar:hover{
+background:#c4009b;
+color:white;
 }
 
-.table thead {
-background: var(--cinza);
-color: white;
+.table thead{
+background:var(--cinza);
+color:white;
 }
 
-.badge-aprovado {
-background-color: #198754;
-color: #fff;
+.badge-aprovado{
+background-color:#198754;
+color:#fff;
 }
 
-.img-termo {
-width: 50px;
-height: 50px;
-object-fit: cover;
-border-radius: 8px;
-cursor: pointer;
-transition: transform 0.2s;
+.img-termo{
+width:50px;
+height:50px;
+object-fit:cover;
+border-radius:8px;
+cursor:pointer;
+transition:transform .2s;
 }
 
-.img-termo:hover {
-transform: scale(1.15);
+.img-termo:hover{
+transform:scale(1.15);
+}
+
+.ver-mais{
+color:var(--magenta);
+cursor:pointer;
+font-weight:500;
+}
+
+.ver-mais:hover{
+text-decoration:underline;
+}
+
+/* evita quebra de layout */
+
+#descricaoCompleta{
+white-space:normal;
+word-wrap:break-word;
+overflow-wrap:break-word;
+word-break:break-word;
+}
+
+/* scroll automático */
+
+.modal-body{
+max-height:60vh;
+overflow-y:auto;
 }
 
 </style>
@@ -161,9 +190,49 @@ Dicionário Técnico - Usuário
 
 
 
+<!-- MODAL DA DESCRIÇÃO -->
+
+<div class="modal fade" id="modalDescricao" tabindex="-1">
+
+<div class="modal-dialog modal-dialog-centered">
+
+<div class="modal-content">
+
+<div class="modal-header">
+
+<h5 class="modal-title">Descrição Completa</h5>
+
+<button class="btn-close" data-bs-dismiss="modal"></button>
+
+</div>
+
+<div class="modal-body">
+
+<p id="descricaoCompleta"></p>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
+
+function limitarTexto(texto, limite=80){
+
+if(texto.length <= limite) return texto;
+
+return texto.substring(0, limite) + "...";
+
+}
+
+
 
 async function carregarTermos() {
 
@@ -185,10 +254,10 @@ termo => termo.status === "Aprovado"
 
 contador.innerText = termosAprovados.length;
 
-if(termosAprovados.length === 0) {
+if(termosAprovados.length === 0){
 
-tabela.innerHTML =
-`<tr>
+tabela.innerHTML = `
+<tr>
 <td colspan="5" class="text-center p-4 text-muted">
 Nenhum termo técnico aprovado no momento.
 </td>
@@ -203,6 +272,8 @@ termosAprovados.forEach(termo => {
 const imgPath = termo.imagem_termo
 ? `api/uploads/${termo.imagem_termo}`
 : 'https://via.placeholder.com/50';
+
+const descricaoCurta = limitarTexto(termo.descricao_termo);
 
 tabela.innerHTML += `
 
@@ -224,13 +295,26 @@ title="Clique para ampliar">
 </td>
 
 <td>
-${termo.descricao_termo}
+
+${descricaoCurta}
+
+${termo.descricao_termo.length > 80 ?
+
+`<span class="ver-mais"
+onclick="abrirDescricao(\`${termo.descricao_termo}\`)">
+ ver mais
+</span>`
+
+: ""}
+
 </td>
 
 <td class="text-center">
+
 <span class="badge badge-aprovado p-2 shadow-sm">
 <i class="bi bi-check-circle me-1"></i> Aprovado
 </span>
+
 </td>
 
 </tr>
@@ -267,6 +351,18 @@ document.getElementById("modalImagem")
 );
 
 modal.show();
+
+}
+
+
+
+function abrirDescricao(texto){
+
+document.getElementById("descricaoCompleta").innerText = texto;
+
+new bootstrap.Modal(
+document.getElementById("modalDescricao")
+).show();
 
 }
 
